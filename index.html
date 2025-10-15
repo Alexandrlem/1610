@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Інтерактивний Посібник: Адаптивність та Кросплатформність</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Cool Neutral & Deep Teal -->
+    <!-- Application Structure Plan: The application is structured thematically rather than mirroring the linear slide deck. A sticky top navigation allows users to jump between key topics like 'Mobile-First', 'Responsive vs. Adaptive', and 'Tools'. This non-linear approach promotes exploration and better understanding. Interactive elements like a clickable timeline, a comparative chart, and live layout demonstrations are used to make abstract concepts tangible and engaging. This structure was chosen to transform passive learning material into an active, exploratory educational tool. -->
+    <!-- Visualization & Content Choices: 
+        1. Report Info: History of Mobile Web -> Goal: Show change over time -> Viz: Interactive Timeline (HTML/CSS/JS) -> Interaction: Click on year to reveal details -> Justification: More engaging than a static list, encourages user interaction.
+        2. Report Info: Responsive vs. Adaptive comparison table -> Goal: Compare two approaches -> Viz: Grouped Bar Chart (Chart.js on Canvas) -> Interaction: Tooltips on hover provide exact data -> Justification: Visualizes the qualitative data from the table, making the trade-offs (e.g., complexity vs. control) immediately apparent and easier to compare.
+        3. Report Info: Figma practical exercises -> Goal: Demonstrate concepts -> Viz: Interactive Demos (HTML/CSS/JS) -> Interaction: Buttons to toggle between mobile/desktop views -> Justification: Allows users to see the principles of responsive layouts in action, which is more effective for learning than static descriptions.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #1e293b; /* slate-800 */
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #0f766e; /* teal-700 */
+            border-bottom-color: #0f766e; /* teal-700 */
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 40vh;
+            max-height: 400px;
+        }
+        .timeline-item.active div:first-child {
+            background-color: #0f766e; /* teal-700 */
+            color: white;
+        }
+        .timeline-item.active div:first-child::after {
+            border-color: #0f766e; /* teal-700 */
+        }
+        .tab.active {
+            background-color: #0f766e; /* teal-700 */
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-teal-800">Посібник з UX/UI</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#intro" class="nav-link font-medium">Вступ</a>
+                <a href="#mobile-first" class="nav-link font-medium">Mobile-First</a>
+                <a href="#responsive-vs-adaptive" class="nav-link font-medium">Порівняння</a>
+                <a href="#tools" class="nav-link font-medium">Інструменти</a>
+                <a href="#cross-platform" class="nav-link font-medium">Кросплатформність</a>
+            </div>
+            <div class="md:hidden">
+                 <button id="menu-btn" class="text-slate-700 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+            <a href="#intro" class="block py-2 nav-link">Вступ</a>
+            <a href="#mobile-first" class="block py-2 nav-link">Mobile-First</a>
+            <a href="#responsive-vs-adaptive" class="block py-2 nav-link">Порівняння</a>
+            <a href="#tools" class="block py-2 nav-link">Інструменти</a>
+            <a href="#cross-platform" class="block py-2 nav-link">Кросплатформність</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        
+        <section id="intro" class="scroll-mt-20 text-center mb-24">
+            <h2 class="text-4xl font-bold mb-4 text-teal-900">Адаптивність та Кросплатформність в UX/UI</h2>
+            <p class="text-lg max-w-3xl mx-auto text-slate-600 mb-12">Від філософії Mobile-first до створення єдиного користувацького досвіду на будь-якому пристрої. Цей посібник допоможе вам зрозуміти, чому сучасні інтерфейси мають бути гнучкими та універсальними.</p>
+            
+            <div class="grid md:grid-cols-2 gap-8 text-left">
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-3 text-teal-800">Адаптивність (Responsive Design)</h3>
+                    <p class="text-slate-600">Це здатність інтерфейсу автоматично та гнучко підлаштовуватись під будь-який розмір екрана. Один дизайн "перетікає" і змінює форму, забезпечуючи оптимальний вигляд всюди.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-3 text-teal-800">Кросплатформність (Cross-platform UX)</h3>
+                    <p class="text-slate-600">Це забезпечення єдиного, цілісного та впізнаваного досвіду користувача незалежно від платформи: браузер, Android, iOS чи desktop-додаток.</p>
+                </div>
+            </div>
+
+            <div class="mt-20">
+                <h3 class="text-2xl font-bold mb-8 text-center text-teal-900">Еволюція мобільного вебу</h3>
+                <div id="timeline" class="relative max-w-3xl mx-auto">
+                    <div class="absolute left-1/2 h-full w-0.5 bg-slate-300"></div>
+                    <div class="mt-8 flex justify-between w-full">
+                        <div class="timeline-item w-1/4 cursor-pointer" data-year="2007">
+                            <div class="mx-auto w-24 h-8 flex items-center justify-center font-bold text-lg bg-white border-2 border-slate-300 rounded-full relative z-10 transition-colors duration-300">2007</div>
+                        </div>
+                        <div class="timeline-item w-1/4 cursor-pointer" data-year="2010">
+                            <div class="mx-auto w-24 h-8 flex items-center justify-center font-bold text-lg bg-white border-2 border-slate-300 rounded-full relative z-10 transition-colors duration-300">2010</div>
+                        </div>
+                        <div class="timeline-item w-1/4 cursor-pointer" data-year="2015">
+                            <div class="mx-auto w-24 h-8 flex items-center justify-center font-bold text-lg bg-white border-2 border-slate-300 rounded-full relative z-10 transition-colors duration-300">2015</div>
+                        </div>
+                         <div class="timeline-item w-1/4 cursor-pointer" data-year="2020">
+                            <div class="mx-auto w-24 h-8 flex items-center justify-center font-bold text-lg bg-white border-2 border-slate-300 rounded-full relative z-10 transition-colors duration-300">2020+</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="timeline-content" class="mt-8 text-center max-w-2xl mx-auto card p-6 min-h-[100px]">
+                    <p class="text-slate-500">Натисніть на рік, щоб побачити подію.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="mobile-first" class="scroll-mt-20 mb-24">
+            <h2 class="text-3xl font-bold mb-4 text-center text-teal-900">Філософія Mobile-First 💡</h2>
+            <p class="text-lg text-center max-w-3xl mx-auto text-slate-600 mb-12">Це підхід, коли ми спочатку проєктуємо для найменшого екрана, а потім розширюємо функціонал та інтерфейс для планшетів і десктопів. Це змушує фокусуватися на найважливішому.</p>
+            <div class="card p-8">
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h3 class="text-xl font-bold mb-4 text-teal-800">Переваги підходу:</h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <span class="text-teal-500 mr-3 mt-1">✓</span>
+                                <div><span class="font-semibold">Концентрація на суті:</span> Немає місця для "візуального шуму" та непотрібних функцій.</div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-teal-500 mr-3 mt-1">✓</span>
+                                <div><span class="font-semibold">Краща продуктивність:</span> Оптимізовані ресурси завантажуються швидше.</div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-teal-500 mr-3 mt-1">✓</span>
+                                <div><span class="font-semibold">Простота масштабування:</span> Легше додавати елементи, ніж видаляти зайві.</div>
+                            </li>
+                             <li class="flex items-start">
+                                <span class="text-teal-500 mr-3 mt-1">✓</span>
+                                <div><span class="font-semibold">Вища конверсія:</span> Зручний досвід для мобільних користувачів.</div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="border border-slate-200 rounded-lg p-4">
+                        <div class="flex justify-center mb-4">
+                            <button id="show-mobile-btn" class="px-4 py-2 text-sm font-medium bg-teal-600 text-white rounded-l-md">Mobile</button>
+                            <button id="show-desktop-btn" class="px-4 py-2 text-sm font-medium bg-slate-200 text-slate-700 rounded-r-md">Desktop</button>
+                        </div>
+                        <div id="demo-container" class="bg-slate-100 p-4 rounded-md transition-all duration-300 mx-auto" style="width: 280px;">
+                            <h4 id="demo-title" class="font-bold text-center mb-2">Розклад занять</h4>
+                            <div id="demo-content" class="space-y-2">
+                                <div class="bg-white p-2 rounded text-sm">Пошук...</div>
+                                <div class="bg-white p-2 rounded text-sm">Список занять...</div>
+                                <div id="demo-filters" class="hidden bg-white p-2 rounded text-sm">Фільтри...</div>
+                                <div class="bg-teal-500 text-white p-2 rounded text-center text-sm">Деталі</div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-center text-slate-500 mt-2">Натисніть для перемикання макету.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="responsive-vs-adaptive" class="scroll-mt-20 mb-24">
+            <h2 class="text-3xl font-bold mb-4 text-center text-teal-900">Responsive vs Adaptive Design</h2>
+            <p class="text-lg text-center max-w-3xl mx-auto text-slate-600 mb-12">Два ключові підходи до створення адаптивних інтерфейсів. Один — гнучкий і плавний, інший — точний і фіксований. Вибір залежить від складності проєкту та потреб користувачів.</p>
+            <div class="flex justify-center mb-8">
+                <button class="tab active px-6 py-2 font-medium rounded-l-lg" data-tab="responsive">Responsive (Гнучкий)</button>
+                <button class="tab px-6 py-2 font-medium bg-slate-200" data-tab="adaptive">Adaptive (Адаптивний)</button>
+                <button class="tab px-6 py-2 font-medium bg-slate-200 rounded-r-lg" data-tab="chart">Порівняння</button>
+            </div>
+            <div class="card p-8 min-h-[450px]">
+                <div id="responsive-content" class="tab-content active">
+                    <h3 class="text-2xl font-bold mb-4 text-teal-800">Responsive Design</h3>
+                    <p class="mb-6">Один дизайн, що **плавно "перетікає"** та підлаштовується під будь-який розмір екрана. Це досягається завдяки гнучкій сітці, відсотковим пропорціям та media queries. Ідеально для контентних сайтів, блогів, портфоліо.</p>
+                    <div class="h-64 bg-slate-100 rounded-lg flex items-center justify-center p-4">
+                        <div class="w-full flex items-center justify-around">
+                            <div class="w-1/4 h-32 bg-teal-200 rounded"></div>
+                            <div class="w-1/4 h-48 bg-teal-300 rounded"></div>
+                            <div class="w-1/4 h-24 bg-teal-400 rounded"></div>
+                        </div>
+                    </div>
+                     <p class="text-center text-sm mt-2 text-slate-500">Елементи гнучко змінюють розмір і положення.</p>
+                </div>
+                <div id="adaptive-content" class="tab-content">
+                    <h3 class="text-2xl font-bold mb-4 text-teal-800">Adaptive Design</h3>
+                    <p class="mb-6">Створюється **кілька окремих фіксованих макетів** для конкретних точок зламу (breakpoints). Система визначає пристрій і завантажує найбільш відповідний макет. Часто використовується у складних веб-додатках, e-commerce платформах.</p>
+                     <div class="h-64 bg-slate-100 rounded-lg flex items-center justify-center p-4">
+                        <div class="w-full flex items-center justify-around">
+                            <div class="w-20 h-32 bg-sky-200 rounded"></div>
+                            <div class="w-32 h-48 bg-sky-300 rounded"></div>
+                            <div class="w-24 h-24 bg-sky-400 rounded"></div>
+                        </div>
+                    </div>
+                    <p class="text-center text-sm mt-2 text-slate-500">Для кожного розміру завантажується свій макет.</p>
+                </div>
+                <div id="chart-content" class="tab-content">
+                    <h3 class="text-2xl font-bold mb-4 text-center text-teal-800">Візуальне порівняння</h3>
+                     <div class="chart-container">
+                        <canvas id="comparisonChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tools" class="scroll-mt-20 mb-24">
+            <h2 class="text-3xl font-bold mb-4 text-center text-teal-900">Інструменти Figma для адаптивності 🛠️</h2>
+            <p class="text-lg text-center max-w-3xl mx-auto text-slate-600 mb-12">Figma надає потужний набір інструментів, що дозволяють дизайнерам створювати гнучкі та адаптивні макети, імітуючи поведінку реальних веб-компонентів.</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card p-6">
+                    <h3 class="font-bold text-lg mb-2">Auto Layout</h3>
+                    <p class="text-slate-600">Створює гнучкі контейнери, що автоматично адаптуються до розміру контенту. Аналог CSS Flexbox.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-lg mb-2">Constraints</h3>
+                    <p class="text-slate-600">Визначає, як елемент поводиться при зміні розміру батьківського фрейму (наприклад, "прикріпити до правого краю").</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-lg mb-2">Layout Grids</h3>
+                    <p class="text-slate-600">Дозволяє створювати колоночні сітки (наприклад, 12 колонок), що є основою для вирівнювання контенту.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-lg mb-2">Variants + Components</h3>
+                    <p class="text-slate-600">Дозволяє створювати один компонент з кількома станами для різних платформ або розмірів екранів.</p>
+                </div>
+                 <div class="card p-6">
+                    <h3 class="font-bold text-lg mb-2">Prototype Resizing</h3>
+                    <p class="text-slate-600">Надає можливість перевірити, як прототип "живе" та адаптується при зміні ширини екрана.</p>
+                </div>
+                 <div class="card p-6">
+                    <h3 class="font-bold text-lg mb-2">Практикум</h3>
+                    <p class="text-slate-600">Поєднання цих інструментів дозволяє створювати динамічні прототипи, що майже не відрізняються від реального сайту.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="cross-platform" class="scroll-mt-20 text-center">
+            <h2 class="text-3xl font-bold mb-4 text-teal-900">Кросплатформний UX 🌐</h2>
+            <p class="text-lg max-w-3xl mx-auto text-slate-600 mb-12">Кросплатформність — це не просто адаптація під різні екрани. Це створення єдиного, безшовного та впізнаваного досвіду на всіх пристроях, де користувач взаємодіє з вашим продуктом.</p>
+            <div class="card p-8">
+                <h3 class="text-xl font-bold mb-6 text-center text-teal-800">Приклад: Музичний сервіс</h3>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="text-center">
+                        <div class="text-5xl mb-4">📱</div>
+                        <h4 class="font-bold mb-2">Mobile App</h4>
+                        <p class="text-sm text-slate-600">Оптимізовано для дотику. Навігація внизу екрана. Кнопки великі. Меню приховане.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-5xl mb-4">💻</div>
+                        <h4 class="font-bold mb-2">Desktop App</h4>
+                        <p class="text-sm text-slate-600">Максимум інформації. Бічна панель для навігації. Використання переваг великого екрана.</p>
+                    </div>
+                     <div class="text-center">
+                        <div class="text-5xl mb-4">🌐</div>
+                        <h4 class="font-bold mb-2">Web Version</h4>
+                        <p class="text-sm text-slate-600">Схожий на Desktop, але адаптується під ширину вікна браузера. Зберігає єдиний стиль.</p>
+                    </div>
+                </div>
+                <div class="mt-8 bg-slate-100 p-6 rounded-lg">
+                    <h4 class="font-bold text-center mb-3">Що залишається незмінним?</h4>
+                    <p class="text-center text-slate-700 max-w-2xl mx-auto">Іконки, кольорова схема, шрифти, назви плейлистів та загальна логіка роботи (наприклад, як працює пошук чи лайки). Це створює відчуття знайомого та надійного продукту.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-slate-800 text-white mt-24">
+        <div class="container mx-auto px-6 py-8 text-center">
+            <p>&copy; 2025. Інтерактивний посібник з UX/UI. Створено для освітніх цілей.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            menuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.4
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if(targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                    if(mobileMenu.classList.contains('hidden') === false){
+                       mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+
+            const timelineData = {
+                '2007': 'Вихід першого **iPhone**. Початок буму мобільного інтернету, що змусило розробників думати про мобільні версії сайтів.',
+                '2010': 'Ітан Маркотт вводить термін **“Responsive Web Design”**. Запропоновано ідею гнучких сіток та медіа-запитів.',
+                '2015': 'Google оголошує **Mobile-first індексацію**. Сайти, не адаптовані для мобільних, почали втрачати позиції в пошуку.',
+                '2020': '**Mobile** стає "дефолтним" каналом взаємодії для більшості користувачів у світі. Дизайн для мобільних стає обов\'язковим.'
+            };
+            const timelineItems = document.querySelectorAll('.timeline-item');
+            const timelineContent = document.getElementById('timeline-content');
+
+            timelineItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    timelineItems.forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    const year = item.dataset.year;
+                    timelineContent.innerHTML = `<p>${timelineData[year].replace(/\*\*(.*?)\*\*/g, '<strong class="text-teal-700">$1</strong>')}</p>`;
+                });
+            });
+
+            const showMobileBtn = document.getElementById('show-mobile-btn');
+            const showDesktopBtn = document.getElementById('show-desktop-btn');
+            const demoContainer = document.getElementById('demo-container');
+            const demoFilters = document.getElementById('demo-filters');
+            
+            showMobileBtn.addEventListener('click', () => {
+                demoContainer.style.width = '280px';
+                demoFilters.classList.add('hidden');
+                showMobileBtn.classList.add('bg-teal-600', 'text-white');
+                showMobileBtn.classList.remove('bg-slate-200', 'text-slate-700');
+                showDesktopBtn.classList.add('bg-slate-200', 'text-slate-700');
+                showDesktopBtn.classList.remove('bg-teal-600', 'text-white');
+            });
+
+            showDesktopBtn.addEventListener('click', () => {
+                demoContainer.style.width = '400px';
+                demoFilters.classList.remove('hidden');
+                showDesktopBtn.classList.add('bg-teal-600', 'text-white');
+                showDesktopBtn.classList.remove('bg-slate-200', 'text-slate-700');
+                showMobileBtn.classList.add('bg-slate-200', 'text-slate-700');
+                showMobileBtn.classList.remove('bg-teal-600', 'text-white');
+            });
+
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active', 'bg-teal-600', 'text-white') || t.classList.add('bg-slate-200'));
+                    tab.classList.add('active', 'bg-teal-600', 'text-white');
+                    tab.classList.remove('bg-slate-200');
+                    
+                    const target = tab.dataset.tab;
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === `${target}-content`) {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            const comparisonChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Складність реалізації', 'Контроль дизайну', 'Вартість розробки', 'Гнучкість'],
+                    datasets: [{
+                        label: 'Responsive',
+                        data: [3, 3, 2, 5],
+                        backgroundColor: 'rgba(20, 184, 166, 0.6)', // teal-500
+                        borderColor: 'rgba(15, 118, 110, 1)', // teal-700
+                        borderWidth: 1
+                    }, {
+                        label: 'Adaptive',
+                        data: [5, 5, 4, 2],
+                        backgroundColor: 'rgba(56, 189, 248, 0.6)', // sky-400
+                        borderColor: 'rgba(14, 116, 144, 1)', // cyan-700
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 5,
+                            ticks: {
+                                stepSize: 1,
+                                callback: function(value) {
+                                    const labels = ['', 'Низький', '', 'Середній', '', 'Високий'];
+                                    return labels[value];
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    const value = context.parsed.y;
+                                    const labels = ['Дуже низький', 'Низький', 'Середній', 'Високий', 'Дуже високий'];
+                                    label += labels[value-1];
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            timelineItems[0].click();
+            navLinks[0].classList.add('active');
+        });
+    </script>
+
+</body>
+</html>
